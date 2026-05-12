@@ -1,0 +1,67 @@
+{
+	"name": "pi-todotools",
+	"version": "0.1.0",
+	"description": "Structured todo tool extension for the pi coding agent. Registers todowrite/todoread, persistent task state, sidebar rendering, workflow prompt guidance, and todo continuation follow-ups.",
+	"type": "module",
+	"license": "MIT",
+	"homepage": "https://github.com/code-yeongyu/pi-todotools",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/code-yeongyu/pi-todotools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/code-yeongyu/pi-todotools/issues"
+	},
+	"keywords": [
+		"pi",
+		"pi-mono",
+		"pi-coding-agent",
+		"pi-extension",
+		"coding-agent",
+		"todo",
+		"todowrite",
+		"todoread",
+		"task-management",
+		"continuation",
+		"typescript"
+	],
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"files": [
+		"src",
+		"LICENSE",
+		"NOTICE",
+		"README.md",
+		"CHANGELOG.md"
+	],
+	"scripts": {
+		"test": "vitest --run",
+		"test:watch": "vitest",
+		"typecheck": "tsgo --noEmit",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"check": "tsgo --noEmit && biome check ."
+	},
+	"peerDependencies": {
+		"@mariozechner/pi-ai": "*",
+		"@mariozechner/pi-coding-agent": "*",
+		"@mariozechner/pi-tui": "*",
+		"typebox": "*"
+	},
+	"dependencies": {
+		"strip-ansi": "^7.1.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.5",
+		"@types/node": "^22.10.5",
+		"@typescript/native-preview": "^7.0.0-dev.20260120.1",
+		"typescript": "^5.9.2",
+		"vitest": "^4.1.5"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	}
+}

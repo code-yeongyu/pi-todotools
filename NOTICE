@@ -1,0 +1,6 @@
+pi-todotools
+
+This package extracts the former senpi-mono builtin todotools extension into
+a standalone pi-coding-agent extension repository.
+
+The extension targets the public pi-coding-agent extension API.

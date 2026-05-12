@@ -1,0 +1,48 @@
+name: Bug Report
+description: Report broken todo state, rendering, prompt guidance, or continuation behavior
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep this concise. Include the todo list, pi command, and settings needed to reproduce.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include exact output/errors.
+    validations:
+      required: true
+
+  - type: textarea
+    id: todos
+    attributes:
+      label: Todo list
+      description: Paste the minimal todowrite payload that reproduces the issue.
+      render: json
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: pi-todotools version
+      placeholder: 0.1.0
+    validations:
+      required: false
+
+  - type: input
+    id: pi-version
+    attributes:
+      label: pi-coding-agent version
+      placeholder: 0.74.0
+    validations:
+      required: false
