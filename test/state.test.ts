@@ -4,6 +4,7 @@ import {
 	getTodoResultLines,
 	getTodoWidgetLines,
 	isIncompleteTodo,
+	isTodoItem,
 	sanitizeTodoText,
 	TODO_STATE_ENTRY_TYPE,
 	type TodoItem,
@@ -45,6 +46,22 @@ describe("todo state", () => {
 		expect(getTodoResultLines(todos)).toEqual(["0 todos", "[✓] Done task", "[×] Cancelled task"]);
 	});
 
+	it("accepts the canonical todo status and priority values", () => {
+		const statuses = ["pending", "in_progress", "completed", "cancelled"];
+		const priorities = ["high", "medium", "low"];
+
+		for (const status of statuses) {
+			for (const priority of priorities) {
+				expect(isTodoItem({ content: `${status}:${priority}`, status, priority })).toBe(true);
+			}
+		}
+	});
+
+	it("rejects non-canonical todo status and priority values", () => {
+		expect(isTodoItem({ content: "Bad status", status: "blocked", priority: "high" })).toBe(false);
+		expect(isTodoItem({ content: "Bad priority", status: "pending", priority: "urgent" })).toBe(false);
+	});
+
 	it("sanitizes todo text before rendering", () => {
 		expect(sanitizeTodoText("Unsafe\u001b[31m text\nnext\tline")).toBe("Unsafe text next line");
 		expect(
@@ -83,5 +100,35 @@ describe("todo state", () => {
 		expect(todos).toEqual(secondTodos);
 		expect(todos).not.toBe(secondTodos);
 		expect(todos[0]).not.toBe(secondTodos[0]);
+	});
+
+	it("rejects malformed persisted entries instead of coercing them", () => {
+		const validTodos: TodoItem[] = [{ content: "Valid", status: "pending", priority: "high" }];
+
+		const todos = getLatestTodosFromBranchEntries([
+			{
+				type: "message",
+				message: {
+					role: "toolResult",
+					toolName: "todowrite",
+					details: { todos: validTodos },
+				},
+			},
+			{
+				type: "custom",
+				customType: TODO_STATE_ENTRY_TYPE,
+				data: { todos: [{ content: "Missing priority", status: "pending" }] },
+			},
+			{
+				type: "message",
+				message: {
+					role: "toolResult",
+					toolName: "todowrite",
+					details: { todos: [{ content: "Bad details", status: "completed", priority: 1 }] },
+				},
+			},
+		]);
+
+		expect(todos).toEqual(validTodos);
 	});
 });

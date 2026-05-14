@@ -1,10 +1,17 @@
 import stripAnsi from "strip-ansi";
+import { isRecord, isTodoStateEntry, isTodoWriteDetails } from "./guards.js";
+
+export { isRecord, isTodoItem, isTodoItemArray, isTodoStateEntry, isTodoWriteDetails } from "./guards.js";
 
 export type TodoItem = {
 	content: string;
-	status: string;
-	priority: string;
+	status: TodoStatus;
+	priority: TodoPriority;
 };
+
+export type TodoStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+export type TodoPriority = "high" | "medium" | "low";
 
 export type TodoWriteDetails = {
 	todos: TodoItem[];
@@ -59,41 +66,29 @@ export function getTodoResultLines(todos: TodoItem[]): string[] {
 	];
 }
 
-export function isTodoItem(value: unknown): value is TodoItem {
-	if (typeof value !== "object" || value === null) {
-		return false;
-	}
-	const item = value as Record<string, unknown>;
-	return typeof item.content === "string" && typeof item.status === "string" && typeof item.priority === "string";
-}
-
-export function isTodoItemArray(value: unknown): value is TodoItem[] {
-	return Array.isArray(value) && value.every(isTodoItem);
-}
-
 export function getLatestTodosFromBranchEntries(entries: BranchEntry[]): TodoItem[] {
 	let todos: TodoItem[] = [];
 
 	for (const entry of entries) {
 		if (entry.type === "custom" && entry.customType === TODO_STATE_ENTRY_TYPE) {
-			const data = entry.data as TodoStateEntry | undefined;
-			if (isTodoItemArray(data?.todos)) {
+			if (isTodoStateEntry(entry.data)) {
+				const data = entry.data;
 				todos = data.todos.map((todo) => ({ ...todo }));
 			}
 			continue;
 		}
 
-		if (entry.type !== "message" || typeof entry.message !== "object" || entry.message === null) {
+		if (entry.type !== "message" || !isRecord(entry.message)) {
 			continue;
 		}
 
-		const message = entry.message as { role?: string; toolName?: string; details?: unknown };
+		const message = entry.message;
 		if (message.role !== "toolResult" || message.toolName !== "todowrite") {
 			continue;
 		}
 
-		const details = message.details as TodoWriteDetails | undefined;
-		if (isTodoItemArray(details?.todos)) {
+		if (isTodoWriteDetails(message.details)) {
+			const details = message.details;
 			todos = details.todos.map((todo) => ({ ...todo }));
 		}
 	}

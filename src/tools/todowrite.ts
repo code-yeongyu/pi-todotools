@@ -1,6 +1,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "typebox";
+import { isTodoWriteDetails } from "../guards.js";
 import {
 	getTodoResultLines,
 	TODO_STATE_ENTRY_TYPE,
@@ -49,11 +50,14 @@ const TodoItemSchema = Type.Object({
 		description:
 			"Todo title encoding WHERE, WHY, HOW, and EXPECTED RESULT. Format: '[WHERE] [HOW] to [WHY] - expect [RESULT]'. Must be a single atomic action completable in 1-3 tool calls.",
 	}),
-	status: Type.String({
-		description:
-			"Current status: pending (not started), in_progress (currently working - limit ONE at a time), completed (finished - mark IMMEDIATELY after done), cancelled (no longer needed)",
-	}),
-	priority: Type.String({
+	status: Type.Union(
+		[Type.Literal("pending"), Type.Literal("in_progress"), Type.Literal("completed"), Type.Literal("cancelled")],
+		{
+			description:
+				"Current status: pending (not started), in_progress (currently working - limit ONE at a time), completed (finished - mark IMMEDIATELY after done), cancelled (no longer needed)",
+		},
+	),
+	priority: Type.Union([Type.Literal("high"), Type.Literal("medium"), Type.Literal("low")], {
 		description:
 			"Priority level: high (blocking or critical path), medium (important but not blocking), low (nice to have)",
 	}),
@@ -107,8 +111,7 @@ export function registerTodoWriteTool(pi: ExtensionAPI, accessors: TodoAccessors
 			);
 		},
 		renderResult(result, _options, theme) {
-			const details = result.details as TodoWriteDetails | undefined;
-			const todos = details?.todos ?? accessors.getCurrentTodos();
+			const todos = isTodoWriteDetails(result.details) ? result.details.todos : accessors.getCurrentTodos();
 			const lines = getTodoResultLines(todos);
 			const title = lines[0] ?? "0 todos";
 			const items = lines.slice(1);

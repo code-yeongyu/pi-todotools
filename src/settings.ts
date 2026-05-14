@@ -1,14 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { isRecord } from "./guards.js";
 
 export interface TodoSettingsPair {
 	globalSettings: Record<string, unknown>;
 	projectSettings: Record<string, unknown>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function readJsonObject(path: string): Record<string, unknown> {
@@ -17,7 +14,7 @@ function readJsonObject(path: string): Record<string, unknown> {
 	}
 
 	try {
-		const parsed = JSON.parse(readFileSync(path, "utf-8"));
+		const parsed: unknown = JSON.parse(readFileSync(path, "utf-8"));
 		return isRecord(parsed) ? parsed : {};
 	} catch {
 		return {};

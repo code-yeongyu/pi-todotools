@@ -1,5 +1,6 @@
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext, SessionStartEvent } from "@mariozechner/pi-coding-agent";
+import { isRecord } from "../guards.js";
 import { readTodoSettings } from "../settings.js";
 import type { TodoItem } from "../state.js";
 import { emitTodoSystemMessageFailure, sendTodoUserMessage } from "../system-messages.js";
@@ -22,12 +23,11 @@ const IDLE_POLL_INTERVAL_MS = 50;
 const IDLE_WAIT_TIMEOUT_MS = 10_000;
 
 function isAssistantMessage(message: unknown): message is AssistantMessage {
-	if (!message || typeof message !== "object") {
+	if (!isRecord(message)) {
 		return false;
 	}
 
-	const role = (message as { role?: unknown }).role;
-	return role === "assistant";
+	return message.role === "assistant";
 }
 
 function getLastAssistantStopReason(messages: unknown[]): string | undefined {
@@ -83,7 +83,7 @@ function isNonInteractiveContext(ctx: ExtensionContext): boolean {
 }
 
 function shouldResetForSessionStart(event: SessionStartEvent): boolean {
-	const reason = event.reason as string;
+	const reason: string = event.reason;
 	return reason === "reload" || reason === "resume" || reason === "compact";
 }
 

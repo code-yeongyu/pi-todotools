@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "typebox";
+import { isTodoWriteDetails } from "../guards.js";
 import { getTodoResultLines, type TodoItem, type TodoWriteDetails } from "../state.js";
 
 const TodoReadParams = Type.Object({});
@@ -27,8 +28,7 @@ export function registerTodoReadTool(pi: ExtensionAPI, getCurrentTodos: () => To
 			return new Text(theme.fg("toolTitle", theme.bold("todoread")), 0, 0);
 		},
 		renderResult(result, _options, theme) {
-			const details = result.details as TodoWriteDetails | undefined;
-			const todos = details?.todos ?? getCurrentTodos();
+			const todos = isTodoWriteDetails(result.details) ? result.details.todos : getCurrentTodos();
 			const lines = getTodoResultLines(todos);
 			const title = lines[0] ?? "0 todos";
 			const items = lines.slice(1);
