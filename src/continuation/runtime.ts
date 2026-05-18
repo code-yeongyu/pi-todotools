@@ -27,7 +27,7 @@ function isAssistantMessage(message: unknown): message is AssistantMessage {
 		return false;
 	}
 
-	return message.role === "assistant";
+	return message["role"] === "assistant";
 }
 
 function getLastAssistantStopReason(messages: unknown[]): string | undefined {
@@ -60,7 +60,7 @@ function createInitialState(): ContinuationState {
 
 function abortPendingDispatch(state: ContinuationState): void {
 	state.pendingDispatchAbortController?.abort();
-	state.pendingDispatchAbortController = undefined;
+	delete state.pendingDispatchAbortController;
 }
 
 function getSessionState(sessionStates: Map<string, ContinuationState>, sessionId: string): ContinuationState {
@@ -239,7 +239,7 @@ export function installContinuation(pi: ExtensionAPI, deps: ContinuationDeps): v
 					} finally {
 						const currentState = sessionStates.get(sessionId);
 						if (currentState?.pendingDispatchAbortController === pendingDispatchAbortController) {
-							currentState.pendingDispatchAbortController = undefined;
+							delete currentState.pendingDispatchAbortController;
 						}
 					}
 				})();

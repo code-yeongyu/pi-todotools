@@ -40,8 +40,8 @@ function unique(paths: string[]): string[] {
 
 function getGlobalSettingsPaths(): string[] {
 	const paths: string[] = [];
-	const piAgentDir = process.env.PI_CODING_AGENT_DIR;
-	const senpiAgentDir = process.env.SENPI_CODING_AGENT_DIR;
+	const piAgentDir = process.env["PI_CODING_AGENT_DIR"];
+	const senpiAgentDir = process.env["SENPI_CODING_AGENT_DIR"];
 	if (piAgentDir) paths.push(join(piAgentDir, "settings.json"));
 	if (senpiAgentDir) paths.push(join(senpiAgentDir, "settings.json"));
 	paths.push(join(homedir(), ".pi", "agent", "settings.json"));

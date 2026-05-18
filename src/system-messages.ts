@@ -77,21 +77,22 @@ function createBaseEvent(args: {
 	text: string;
 	errorMessage?: string;
 }): TodoConversationEvent {
-	return {
+	const event: TodoConversationEvent = {
 		version: 1,
 		source: "builtin",
 		action: args.action,
 		route: args.route,
-		sessionId: args.sessionId,
 		timestamp: Date.now(),
 		conversation: {
 			prefix: SANEPI_SYSTEM_PREFIX,
 			kind: "user_message",
-			deliverAs: args.deliverAs,
 		},
 		text: args.text,
-		errorMessage: args.errorMessage,
 	};
+	if (args.sessionId !== undefined) event.sessionId = args.sessionId;
+	if (args.deliverAs !== undefined) event.conversation.deliverAs = args.deliverAs;
+	if (args.errorMessage !== undefined) event.errorMessage = args.errorMessage;
+	return event;
 }
 
 function hasUserMessageOptions(
@@ -113,9 +114,9 @@ export function sendTodoUserMessage(
 		createBaseEvent({
 			action: "injected",
 			route,
-			sessionId: options?.sessionId,
 			text: extractText(prefixedContent),
-			deliverAs: options?.deliverAs,
+			...(options?.sessionId === undefined ? {} : { sessionId: options.sessionId }),
+			...(options?.deliverAs === undefined ? {} : { deliverAs: options.deliverAs }),
 		}),
 	);
 
@@ -144,10 +145,10 @@ export function emitTodoSystemMessageFailure(
 		createBaseEvent({
 			action: "failed",
 			route: args.route,
-			sessionId: args.sessionId,
 			text: extractText(prefixedContent),
-			deliverAs: args.deliverAs,
 			errorMessage: args.errorMessage,
+			...(args.sessionId === undefined ? {} : { sessionId: args.sessionId }),
+			...(args.deliverAs === undefined ? {} : { deliverAs: args.deliverAs }),
 		}),
 	);
 }

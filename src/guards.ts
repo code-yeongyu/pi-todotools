@@ -15,9 +15,9 @@ export function isTodoPriority(value: unknown): value is TodoPriority {
 export function isTodoItem(value: unknown): value is TodoItem {
 	return (
 		isRecord(value) &&
-		typeof value.content === "string" &&
-		isTodoStatus(value.status) &&
-		isTodoPriority(value.priority)
+		typeof value["content"] === "string" &&
+		isTodoStatus(value["status"]) &&
+		isTodoPriority(value["priority"])
 	);
 }
 
@@ -26,9 +26,9 @@ export function isTodoItemArray(value: unknown): value is TodoItem[] {
 }
 
 export function isTodoStateEntry(value: unknown): value is TodoStateEntry {
-	return isRecord(value) && isTodoItemArray(value.todos);
+	return isRecord(value) && isTodoItemArray(value["todos"]);
 }
 
 export function isTodoWriteDetails(value: unknown): value is TodoWriteDetails {
-	return isRecord(value) && isTodoItemArray(value.todos);
+	return isRecord(value) && isTodoItemArray(value["todos"]);
 }

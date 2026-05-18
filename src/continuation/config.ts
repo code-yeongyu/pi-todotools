@@ -17,17 +17,18 @@ function getConfiguredEnabled(settings: Record<string, unknown> | undefined): bo
 		return undefined;
 	}
 
-	const todotools = settings.todotools;
+	const todotools = settings["todotools"];
 	if (!isRecord(todotools)) {
 		return undefined;
 	}
 
-	const continuation = todotools.continuation;
+	const continuation = todotools["continuation"];
 	if (!isRecord(continuation)) {
 		return undefined;
 	}
 
-	return typeof continuation.enabled === "boolean" ? continuation.enabled : undefined;
+	const enabled = continuation["enabled"];
+	return typeof enabled === "boolean" ? enabled : undefined;
 }
 
 export function resolveContinuationConfig({

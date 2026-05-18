@@ -11,7 +11,7 @@ function captureTool(register: (pi: ExtensionAPI) => void): ToolDefinition {
 			capturedTool = tool;
 		},
 		appendEntry: vi.fn(),
-	} as unknown as ExtensionAPI;
+	} as Partial<ExtensionAPI> as ExtensionAPI;
 
 	register(pi);
 
@@ -54,7 +54,7 @@ describe("todo tools", () => {
 				capturedTool = tool;
 			},
 			appendEntry,
-		} as unknown as ExtensionAPI;
+		} as Partial<ExtensionAPI> as ExtensionAPI;
 		registerTodoWriteTool(pi, {
 			getCurrentTodos: () => currentTodos,
 			setCurrentTodos: (nextTodos) => {

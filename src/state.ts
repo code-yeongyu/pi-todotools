@@ -83,12 +83,13 @@ export function getLatestTodosFromBranchEntries(entries: BranchEntry[]): TodoIte
 		}
 
 		const message = entry.message;
-		if (message.role !== "toolResult" || message.toolName !== "todowrite") {
+		if (message["role"] !== "toolResult" || message["toolName"] !== "todowrite") {
 			continue;
 		}
 
-		if (isTodoWriteDetails(message.details)) {
-			const details = message.details;
+		const messageDetails = message["details"];
+		if (isTodoWriteDetails(messageDetails)) {
+			const details = messageDetails;
 			todos = details.todos.map((todo) => ({ ...todo }));
 		}
 	}

@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readTodoSettings } from "../src/settings.js";
 
-const ORIGINAL_PI_CODING_AGENT_DIR = process.env.PI_CODING_AGENT_DIR;
-const ORIGINAL_SENPI_CODING_AGENT_DIR = process.env.SENPI_CODING_AGENT_DIR;
+const ORIGINAL_PI_CODING_AGENT_DIR = process.env["PI_CODING_AGENT_DIR"];
+const ORIGINAL_SENPI_CODING_AGENT_DIR = process.env["SENPI_CODING_AGENT_DIR"];
 
 function createTemporaryDirectory(): string {
 	return mkdtempSync(join(tmpdir(), "pi-todotools-"));
@@ -14,14 +14,14 @@ function createTemporaryDirectory(): string {
 describe("todo settings", () => {
 	afterEach(() => {
 		if (ORIGINAL_PI_CODING_AGENT_DIR === undefined) {
-			delete process.env.PI_CODING_AGENT_DIR;
+			delete process.env["PI_CODING_AGENT_DIR"];
 		} else {
-			process.env.PI_CODING_AGENT_DIR = ORIGINAL_PI_CODING_AGENT_DIR;
+			process.env["PI_CODING_AGENT_DIR"] = ORIGINAL_PI_CODING_AGENT_DIR;
 		}
 		if (ORIGINAL_SENPI_CODING_AGENT_DIR === undefined) {
-			delete process.env.SENPI_CODING_AGENT_DIR;
+			delete process.env["SENPI_CODING_AGENT_DIR"];
 		} else {
-			process.env.SENPI_CODING_AGENT_DIR = ORIGINAL_SENPI_CODING_AGENT_DIR;
+			process.env["SENPI_CODING_AGENT_DIR"] = ORIGINAL_SENPI_CODING_AGENT_DIR;
 		}
 	});
 
@@ -35,8 +35,8 @@ describe("todo settings", () => {
 			mkdirSync(senpiAgentDirectory, { recursive: true });
 			mkdirSync(join(cwd, ".pi"), { recursive: true });
 			mkdirSync(join(cwd, ".senpi"), { recursive: true });
-			process.env.PI_CODING_AGENT_DIR = piAgentDirectory;
-			process.env.SENPI_CODING_AGENT_DIR = senpiAgentDirectory;
+			process.env["PI_CODING_AGENT_DIR"] = piAgentDirectory;
+			process.env["SENPI_CODING_AGENT_DIR"] = senpiAgentDirectory;
 
 			writeFileSync(
 				join(piAgentDirectory, "settings.json"),

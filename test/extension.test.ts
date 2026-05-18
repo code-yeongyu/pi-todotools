@@ -19,15 +19,15 @@ describe("todotools extension", () => {
 				eventHandlers.push(handler);
 				handlers.set(event, eventHandlers);
 			},
-			events: { emit: vi.fn() },
-		} as unknown as ExtensionAPI;
+			events: { emit: vi.fn(), on: vi.fn(() => () => {}) },
+		} as Partial<ExtensionAPI> as ExtensionAPI;
 
 		todotoolsExtension(pi);
 
 		const beforeAgentStartHandlers = handlers.get("before_agent_start") ?? [];
 		const ctx = {
 			sessionManager: { getSessionId: () => "session-1" },
-		} as unknown as ExtensionContext;
+		} as Partial<ExtensionContext> as ExtensionContext;
 		const results = [];
 		for (const handler of beforeAgentStartHandlers) {
 			results.push(

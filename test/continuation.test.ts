@@ -48,6 +48,7 @@ function createMockPi() {
 			emit(event: string, payload: unknown) {
 				emitted.push({ event, payload });
 			},
+			on: vi.fn(() => () => {}),
 		},
 		async trigger(event: string, payload: unknown, ctx: ExtensionContext) {
 			for (const handler of handlers.get(event) ?? []) {
@@ -60,7 +61,7 @@ function createMockPi() {
 }
 
 function createMockContext(options?: { hasUI?: boolean; isIdle?: () => boolean }): ExtensionContext {
-	return {
+	const context: Record<keyof ExtensionContext, unknown> = {
 		hasUI: options?.hasUI ?? true,
 		isIdle: options?.isIdle ?? (() => true),
 		sessionManager: {
@@ -70,7 +71,17 @@ function createMockContext(options?: { hasUI?: boolean; isIdle?: () => boolean }
 			notify: vi.fn(),
 		},
 		cwd: process.cwd(),
-	} as unknown as ExtensionContext;
+		modelRegistry: {},
+		model: undefined,
+		signal: undefined,
+		abort: () => {},
+		hasPendingMessages: () => false,
+		shutdown: () => {},
+		getContextUsage: () => undefined,
+		compact: () => {},
+		getSystemPrompt: () => "",
+	};
+	return context as ExtensionContext;
 }
 
 describe("todo continuation", () => {
@@ -118,7 +129,7 @@ describe("todo continuation", () => {
 		const mockPi = createMockPi();
 		const ctx = createMockContext();
 
-		installContinuation(mockPi as unknown as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
+		installContinuation(mockPi as Partial<ExtensionAPI> as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
 		await mockPi.trigger("agent_end", createAgentEndEvent("stop"), ctx);
 		await vi.advanceTimersByTimeAsync(0);
 
@@ -143,7 +154,7 @@ describe("todo continuation", () => {
 		const mockPi = createMockPi();
 		const ctx = createMockContext({ isIdle: () => isIdle });
 
-		installContinuation(mockPi as unknown as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
+		installContinuation(mockPi as Partial<ExtensionAPI> as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
 		await mockPi.trigger("agent_end", createAgentEndEvent("stop"), ctx);
 		await vi.advanceTimersByTimeAsync(0);
 		await mockPi.trigger("before_agent_start", createBeforeAgentStartEvent("new user request"), ctx);
@@ -159,7 +170,7 @@ describe("todo continuation", () => {
 		const mockPi = createMockPi();
 		const ctx = createMockContext({ isIdle: () => isIdle });
 
-		installContinuation(mockPi as unknown as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
+		installContinuation(mockPi as Partial<ExtensionAPI> as ExtensionAPI, { getCurrentTodos: () => pendingTodos });
 		await mockPi.trigger("agent_end", createAgentEndEvent("stop"), ctx);
 		await vi.advanceTimersByTimeAsync(0);
 		await mockPi.trigger(
