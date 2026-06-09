@@ -13,7 +13,7 @@ Rules:
 - Always use todos. No trivial-task exemption.
 - Keep exactly one todo \`in_progress\`.
 - Mark a todo \`completed\` immediately after finishing it; never batch completions.
-- Update todos when scope changes or continuation resumes.
+- Update todos when scope changes.
 - Vague todos are invalid; split work until each item is actionable in one small step.
 
 Completion evidence:

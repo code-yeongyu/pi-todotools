@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/code-yeongyu/pi-todotools/actions/workflows/ci.yml/badge.svg)](https://github.com/code-yeongyu/pi-todotools/actions/workflows/ci.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Structured todo tools for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent). The extension registers `todowrite` and `todoread`, persists todo state in the session, renders a sidebar widget, appends workflow-first prompt guidance, and can automatically continue when incomplete todos remain.
+Structured todo tools for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent). The extension registers `todowrite` and `todoread`, persists todo state in the session, renders a sidebar widget, and appends workflow-first prompt guidance.
 
 This package is the standalone extraction of senpi-mono's former builtin `todotools` extension.
 
@@ -13,8 +13,7 @@ This package is the standalone extraction of senpi-mono's former builtin `todoto
 | Agent calls `todowrite` | replaces the complete todo list, persists it as `sanepi.todo-state`, and refreshes the todo sidebar |
 | Agent calls `todoread` | returns the current todo list as JSON |
 | Session reloads or tree navigation changes | reconstructs the latest branch-local todo state from custom entries or historical `todowrite` results |
-| Incomplete todos remain after a clean assistant stop | injects a follow-up continuation prompt unless disabled |
-| All todos are `completed` or `cancelled` | hides the sidebar and stops continuation |
+| All todos are `completed` or `cancelled` | hides the sidebar |
 
 ## Tools
 
@@ -46,26 +45,6 @@ Reads the current todo list for the active coding session.
 ```json
 {}
 ```
-
-## Settings
-
-Todo continuation is enabled by default in interactive sessions. Disable it with either the CLI flag or settings:
-
-```bash
-pi --disable-todo-continuation
-```
-
-```json
-{
-  "todotools": {
-    "continuation": {
-      "enabled": false
-    }
-  }
-}
-```
-
-Project settings override global settings.
 
 ## Installation
 

@@ -44,10 +44,6 @@ describe("todotools extension", () => {
 		}
 
 		expect(registeredTools).toEqual(["todowrite", "todoread"]);
-		expect(pi.registerFlag).toHaveBeenCalledWith(
-			"disable-todo-continuation",
-			expect.objectContaining({ type: "boolean", default: false }),
-		);
 		expect(results).toContainEqual({ systemPrompt: `base\n${TASK_MANAGEMENT_SECTION}` });
 	});
 });
