@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the `todowrite` tool call row to show the actual todo items instead of only an item count.
+
 ### Removed
 
 - Todo continuation auto follow-up that re-prompted the agent when incomplete todos remained after a clean stop.
