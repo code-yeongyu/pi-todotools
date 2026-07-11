@@ -1,6 +1,6 @@
 {
 	"name": "pi-todotools",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Structured todo tool extension for the pi coding agent. Registers todowrite/todoread, persistent task state, sidebar rendering, workflow prompt guidance, and todo continuation follow-ups.",
 	"type": "module",
 	"license": "MIT",
@@ -46,9 +46,9 @@
 		"check": "tsgo --noEmit && biome check ."
 	},
 	"peerDependencies": {
-		"@mariozechner/pi-ai": "*",
-		"@mariozechner/pi-coding-agent": "*",
-		"@mariozechner/pi-tui": "*",
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
 		"typebox": "*"
 	},
 	"dependencies": {

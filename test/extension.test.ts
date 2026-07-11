@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { describe, expect, it, vi } from "vitest";
 import todotoolsExtension, { TASK_MANAGEMENT_SECTION } from "../src/index.js";
 

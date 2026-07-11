@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { TASK_MANAGEMENT_SECTION } from "./prompt.js";
 import { getLatestTodosFromBranchEntries, getTodoWidgetLines, type TodoItem } from "./state.js";
 import { registerTodoReadTool } from "./tools/todoread.js";

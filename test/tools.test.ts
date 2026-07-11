@@ -1,4 +1,4 @@
-import { type ExtensionAPI, type ExtensionContext, Theme, type ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { type ExtensionAPI, type ExtensionContext, Theme, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 import stripAnsi from "strip-ansi";
 import { describe, expect, it, vi } from "vitest";
 import { TODO_STATE_ENTRY_TYPE, type TodoItem } from "../src/state.js";
@@ -68,6 +68,7 @@ const fgColors: ConstructorParameters<typeof Theme>[0] = {
 	thinkingMedium: "#ffffff",
 	thinkingHigh: "#ffffff",
 	thinkingXhigh: "#ffffff",
+	thinkingMax: "#ffffff",
 	bashMode: "#ffffff",
 };
 const bgColors: ConstructorParameters<typeof Theme>[1] = {
