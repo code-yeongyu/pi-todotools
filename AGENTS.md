@@ -23,8 +23,8 @@ Conventions for human contributors and AI agents working on this repository.
 
 - No Bun APIs. Runtime is Node only.
 - No dependency on pi-coding-agent internal modules outside the documented public extension API in `@mariozechner/pi-coding-agent`.
-- Keep `todowrite` / `todoread` tool names stable; existing session history reconstructs todo state from those tool results.
-- Keep `sanepi.todo-state` custom entries readable for compatibility with senpi sessions created before extraction.
+- Keep the `todo` tool name and the `sanepi.todo-state` custom entry key stable; existing session history reconstructs todo state from `todo` and legacy `todowrite` tool results.
+- Keep legacy flat `sanepi.todo-state` payloads (the `todos` array with `priority` fields and `cancelled` statuses) readable for compatibility with sessions created before 0.2.0.
 
 ## Don'ts
 

@@ -1,25 +1,60 @@
+// Adapted from oh-my-pi's todo prompt (MIT License).
+// Copyright (c) 2025 Mario Zechner
+// Copyright (c) 2025-2026 Can Bölük
+// https://github.com/can1357/oh-my-pi
+
+export const TODO_TOOL_DESCRIPTION = `**Tasks referenced by verbatim content string, NEVER an auto-generated ID — no "task-1"/"task-N" exists. Pass the content text in the task field.**
+
+On each completion the earliest still-open task (in phase order) auto-promotes to in_progress.
+Completing tasks out of phase order can move this pointer **back** to an earlier phase — expected; completed tasks are never reverted.
+
+## Operations
+
+| op | Required fields | Effect |
+|---|---|---|
+| init | list: [{phase, items: string[]}] | Initialize full list (replaces existing) |
+| init | items: string[] | Flattened single-phase init |
+| start | task | Mark in progress |
+| done | task or phase | Mark completed |
+| drop | task or phase | Mark abandoned |
+| rm | task or phase (optional) | Remove task or phase; omit both to clear |
+| append | phase, items: string[] | Append tasks to phase; lazily creates phase |
+| view | — | Read-only: echo list |
+
+## Anatomy
+- **Task content**: 5–10 words; what, not how. Unique identifier.
+- **Phase name**: short noun phrase (e.g. Foundation, Auth, Verification). Unique identifier. NEVER prefix 1., A), Phase 1:.
+
+## Rules
+- Mark tasks done immediately after finishing. Complete phases in order.
+- NEVER make a todo call your turn's only tool call — batch it with the real work: init with the first reads/edits, each done/start with the next action. Solo todo turns waste a round trip.
+- Blocked? append a task to the active phase, or drop.
+- Keep task/phase strings stable once introduced.
+- Lost the exact task text? view echoes the list — NEVER guess from memory.
+
+## When to create a list
+- Task requires 3+ distinct steps
+- User explicitly requests one
+- User provides a set of tasks
+- New instructions arrive mid-task — capture before proceeding
+
+<critical>
+User hands you a multi-step plan — phased todo, numbered/bulleted checklist, or "N bugs/items/tasks":
+- You MUST init the list with EVERY item as its own task before working.
+- Enumerate all; NEVER summarize into fewer tasks, sample "the important ones", drop items, or track the rest from memory.
+</critical>`;
+
 export const TASK_MANAGEMENT_SECTION = `
 <Task_Management>
-Todo tools are the coordination mechanism for every task.
+## Todo Management (CRITICAL)
 
-Workflow:
-1. EXPLORE relevant files and existing patterns before editing or creating todos.
-2. DEFINE the final deliverable and success criteria; ask only if material ambiguity remains.
-3. PLAN the approach for the user before creating todos.
-4. TODO: create detailed atomic todos. Each item should name WHAT, WHERE, HOW, and VERIFY.
-5. EXECUTE through the list with evidence.
+Use the todo tool for multi-step work. It is one op-based operation at a time: initialize a phased list, then start, complete, abandon, append, remove, or view tasks by their exact content. The earliest open task auto-promotes after each completion.
 
-Rules:
-- Always use todos. No trivial-task exemption.
-- Keep exactly one todo \`in_progress\`.
-- Mark a todo \`completed\` immediately after finishing it; never batch completions.
-- Update todos when scope changes.
-- Vague todos are invalid; split work until each item is actionable in one small step.
+${TODO_TOOL_DESCRIPTION}
 
-Completion evidence:
-- File edit -> diagnostics clean on changed files.
-- Build/check command -> exit code 0.
-- Test run -> pass, or report unrelated pre-existing failures.
-- Do not claim completion without verification.
+## Evidence
+- File edit: inspect the changed files and diagnostics.
+- Build command: require exit code 0.
+- Test run: require passing output, or state the pre-existing failure.
 </Task_Management>
 `;

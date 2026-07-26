@@ -1,98 +1,184 @@
-import stripAnsi from "strip-ansi";
-import { isRecord, isTodoStateEntry, isTodoWriteDetails } from "./guards.js";
+// Ported and adapted from oh-my-pi's todo tool (MIT License).
+// Copyright (c) 2025 Mario Zechner
+// Copyright (c) 2025-2026 Can Bölük
+// https://github.com/can1357/oh-my-pi
 
-export { isRecord, isTodoItem, isTodoItemArray, isTodoStateEntry, isTodoWriteDetails } from "./guards.js";
+export type TodoStatus = "pending" | "in_progress" | "completed" | "abandoned";
+
+export type TodoOperation = "init" | "start" | "done" | "rm" | "drop" | "append" | "view";
 
 export type TodoItem = {
 	content: string;
 	status: TodoStatus;
-	priority: TodoPriority;
 };
 
-export type TodoStatus = "pending" | "in_progress" | "completed" | "cancelled";
+export type TodoPhase = {
+	name: string;
+	tasks: TodoItem[];
+};
 
-export type TodoPriority = "high" | "medium" | "low";
+export type TodoCompletionTransition = {
+	phase: string;
+	content: string;
+};
 
-export type TodoWriteDetails = {
-	todos: TodoItem[];
+export type TodoToolDetails = {
+	op?: TodoOperation;
+	phases: TodoPhase[];
+	storage: "session" | "memory";
+	completedTasks?: TodoCompletionTransition[];
 };
 
 export type TodoStateEntry = {
-	todos: TodoItem[];
+	schema: "v2";
+	phases: TodoPhase[];
 };
 
-type BranchEntry = { type: string; customType?: string; data?: unknown; message?: unknown };
-
 export const TODO_STATE_ENTRY_TYPE = "sanepi.todo-state";
+export const DEFAULT_INIT_PHASE = "Tasks";
 
-export function isTerminalTodoStatus(status: string): boolean {
-	return status === "completed" || status === "cancelled";
+export type TodoPhaseInput = {
+	phase: string;
+	items: string[];
+};
+
+export type TodoOpEntry = {
+	op: TodoOperation;
+	list?: TodoPhaseInput[];
+	task?: string;
+	phase?: string;
+	items?: string[];
+};
+
+export type TaskHit = {
+	task: TodoItem;
+	phase: TodoPhase;
+};
+
+export type BranchEntry = { type: string; customType?: string; data?: unknown; message?: unknown };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
 }
 
-export function isIncompleteTodo(todo: TodoItem): boolean {
-	return !isTerminalTodoStatus(todo.status);
+function isTodoStatus(value: unknown): value is TodoStatus {
+	return value === "pending" || value === "in_progress" || value === "completed" || value === "abandoned";
 }
 
-function countOpenTodos(todos: TodoItem[]): number {
-	return todos.filter(isIncompleteTodo).length;
+function parseTodoStatus(value: unknown): TodoStatus | undefined {
+	if (value === "cancelled") return "abandoned";
+	return isTodoStatus(value) ? value : undefined;
 }
 
-export function sanitizeTodoText(text: string): string {
-	return stripAnsi(text)
-		.replace(/[\r\n]+/g, " ")
-		.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
+function parseTodoItem(value: unknown, options?: { lenient?: boolean }): TodoItem | undefined {
+	if (!isRecord(value) || typeof value["content"] !== "string") return undefined;
+	const status = parseTodoStatus(value["status"]) ?? (options?.lenient ? "pending" : undefined);
+	return status ? { content: value["content"], status } : undefined;
 }
 
-export function getTodoMarker(status: string): string {
-	if (status === "completed") return "[✓]";
-	if (status === "in_progress") return "[•]";
-	if (status === "cancelled") return "[×]";
-	return "[ ]";
-}
-
-export function getTodoWidgetLines(todos: TodoItem[]): string[] | undefined {
-	if (todos.length === 0 || !todos.some(isIncompleteTodo)) {
-		return undefined;
+function parseTodoPhase(value: unknown): TodoPhase | undefined {
+	if (!isRecord(value) || typeof value["name"] !== "string" || !Array.isArray(value["tasks"])) return undefined;
+	const tasks: TodoItem[] = [];
+	for (const task of value["tasks"]) {
+		const parsed = parseTodoItem(task);
+		if (!parsed) return undefined;
+		tasks.push(parsed);
 	}
-	return ["Todo", ...todos.map((todo) => `${getTodoMarker(todo.status)} ${sanitizeTodoText(todo.content)}`)];
+	return { name: value["name"], tasks };
 }
 
-export function getTodoResultLines(todos: TodoItem[]): string[] {
-	return [
-		`${countOpenTodos(todos)} todos`,
-		...todos.map((todo) => `${getTodoMarker(todo.status)} ${sanitizeTodoText(todo.content)}`),
-	];
+function parsePhases(value: unknown): TodoPhase[] | undefined {
+	if (!Array.isArray(value)) return undefined;
+	const phases: TodoPhase[] = [];
+	for (const phase of value) {
+		const parsed = parseTodoPhase(phase);
+		if (!parsed) return undefined;
+		phases.push(parsed);
+	}
+	return phases;
 }
 
-export function getLatestTodosFromBranchEntries(entries: BranchEntry[]): TodoItem[] {
-	let todos: TodoItem[] = [];
+function parseLegacyTodos(value: unknown): TodoPhase[] | undefined {
+	if (!Array.isArray(value)) return undefined;
+	const tasks: TodoItem[] = [];
+	for (const todo of value) {
+		// Legacy todowrite persisted arbitrary status strings (e.g. "blocked")
+		// alongside a priority field. Preserve those entries instead of dropping
+		// the whole list: unknown statuses become "pending" so the task survives
+		// migration as open work, and the priority field is dropped.
+		const parsed = parseTodoItem(todo, { lenient: true });
+		if (!parsed) return undefined;
+		tasks.push(parsed);
+	}
+	return [{ name: DEFAULT_INIT_PHASE, tasks }];
+}
+
+function readTodoPayload(value: unknown): TodoPhase[] | undefined {
+	if (!isRecord(value)) return undefined;
+	if (value["schema"] === "v2") return parsePhases(value["phases"]);
+	if (Array.isArray(value["phases"])) return parsePhases(value["phases"]);
+	if (Array.isArray(value["todos"])) return parseLegacyTodos(value["todos"]);
+	return undefined;
+}
+
+export function findTaskByContent(phases: TodoPhase[], content: string): TaskHit | undefined {
+	for (const phase of phases) {
+		const task = phase.tasks.find((candidate) => candidate.content === content);
+		if (task) return { task, phase };
+	}
+	return undefined;
+}
+
+export function findPhaseByName(phases: TodoPhase[], name: string): TodoPhase | undefined {
+	return phases.find((phase) => phase.name === name);
+}
+
+export function cloneTask(task: TodoItem): TodoItem {
+	return { content: task.content, status: task.status };
+}
+
+export function clonePhases(phases: readonly TodoPhase[]): TodoPhase[] {
+	return phases.map((phase) => ({ name: phase.name, tasks: phase.tasks.map(cloneTask) }));
+}
+
+export function isTodoItem(value: unknown): value is TodoItem {
+	return parseTodoItem(value) !== undefined;
+}
+
+export function isTodoItemArray(value: unknown): value is TodoItem[] {
+	return Array.isArray(value) && value.every(isTodoItem);
+}
+
+export function isTodoPhase(value: unknown): value is TodoPhase {
+	return parseTodoPhase(value) !== undefined;
+}
+
+export function isTodoPhaseArray(value: unknown): value is TodoPhase[] {
+	return Array.isArray(value) && value.every(isTodoPhase);
+}
+
+export function getLatestPhasesFromBranchEntries(entries: BranchEntry[]): TodoPhase[] {
+	let phases: TodoPhase[] = [];
 
 	for (const entry of entries) {
 		if (entry.type === "custom" && entry.customType === TODO_STATE_ENTRY_TYPE) {
-			if (isTodoStateEntry(entry.data)) {
-				const data = entry.data;
-				todos = data.todos.map((todo) => ({ ...todo }));
-			}
+			const parsed = readTodoPayload(entry.data);
+			if (parsed) phases = clonePhases(parsed);
 			continue;
 		}
 
-		if (entry.type !== "message" || !isRecord(entry.message)) {
-			continue;
-		}
+		if (entry.type !== "message" || !isRecord(entry.message)) continue;
+		if (entry.message["role"] !== "toolResult") continue;
+		if (entry.message["toolName"] !== "todo" && entry.message["toolName"] !== "todowrite") continue;
 
-		const message = entry.message;
-		if (message["role"] !== "toolResult" || message["toolName"] !== "todowrite") {
-			continue;
-		}
-
-		const messageDetails = message["details"];
-		if (isTodoWriteDetails(messageDetails)) {
-			const details = messageDetails;
-			todos = details.todos.map((todo) => ({ ...todo }));
-		}
+		const parsed = readTodoPayload(entry.message["details"]);
+		if (parsed) phases = clonePhases(parsed);
 	}
 
-	return todos;
+	return phases;
+}
+
+/** Compatibility reader for callers that still expect the old flat array. */
+export function getLatestTodosFromBranchEntries(entries: BranchEntry[]): TodoItem[] {
+	return getLatestPhasesFromBranchEntries(entries).flatMap((phase) => phase.tasks.map(cloneTask));
 }

@@ -4,3 +4,19 @@ This package extracts the former senpi-mono builtin todotools extension into
 a standalone pi-coding-agent extension repository.
 
 The extension targets the public pi-coding-agent extension API.
+
+---
+
+The phased, op-based todo tool (state model, operations, prompt anatomy,
+markdown round trip, and phase-tree rendering) is ported and adapted from
+oh-my-pi (https://github.com/can1357/oh-my-pi), specifically
+`packages/coding-agent/src/tools/todo.ts` and
+`packages/coding-agent/src/prompts/tools/todo.md` at commit
+9fd6e97113f5ed3a847e66d346970efdf8afcad9 (v17.0.5), used under the MIT
+License:
+
+Copyright (c) 2025 Mario Zechner
+Copyright (c) 2025-2026 Can Bölük
+
+The MIT license text is distributed in the LICENSE file, and the copyright
+lines above are preserved in the headers of the ported source files.
