@@ -7,9 +7,13 @@ import {
 	getLatestPhasesFromBranchEntries,
 	getLatestTodosFromBranchEntries,
 	isTodoItem,
+	isTodoItemArray,
 	isTodoPhase,
+	isTodoPhaseArray,
 	TODO_STATE_ENTRY_TYPE,
+	type TodoItem,
 	type TodoPhase,
+	type TodoStatus,
 } from "../src/state.js";
 
 function firstOf<T>(items: T[]): T {
@@ -64,12 +68,78 @@ describe("todo state", () => {
 		for (const status of ["pending", "in_progress", "completed", "abandoned"]) {
 			expect(isTodoItem({ content: `task ${status}`, status })).toBe(true);
 		}
-		expect(isTodoItem({ content: "legacy cancelled", status: "cancelled" })).toBe(true);
+		// "cancelled" is a legacy status, not a canonical TodoStatus: the strict
+		// guard must reject it so the narrowed value's status type stays sound.
+		expect(isTodoItem({ content: "legacy cancelled", status: "cancelled" })).toBe(false);
 		expect(isTodoItem({ content: "unknown", status: "blocked" })).toBe(false);
 		expect(isTodoItem({ status: "pending" })).toBe(false);
 		expect(isTodoItem({ content: "no priority leak", status: "pending", priority: "high" })).toBe(true);
 		expect(isTodoPhase({ name: "Phase", tasks: [{ content: "task", status: "pending" }] })).toBe(true);
 		expect(isTodoPhase({ name: "Phase", tasks: [{ content: "task", status: "blocked" }] })).toBe(false);
+	});
+
+	it("isTodoItem is a sound strict guard: a narrowed value's status is a canonical TodoStatus", () => {
+		// given a value whose runtime status is NOT a canonical TodoStatus
+		const input: unknown = { content: "x", status: "cancelled" };
+
+		// when the strict guard runs
+		const narrowed = isTodoItem(input);
+
+		// then it must reject so the input is never mis-narrowed to TodoItem
+		expect(narrowed).toBe(false);
+		// and the canonical statuses still pass while non-canonical ones fail
+		expect(isTodoItem({ content: "ok", status: "abandoned" })).toBe(true);
+		expect(isTodoItem({ content: "ok", status: "in_progress" })).toBe(true);
+		expect(isTodoItem({ content: "bad", status: "cancelled" })).toBe(false);
+		expect(isTodoItem({ content: "bad", status: "blocked" })).toBe(false);
+	});
+
+	it("isTodoItem narrows to a TodoItem whose status is assignable to TodoStatus", () => {
+		// given a canonical item
+		const input: unknown = { content: "wire", status: "in_progress" };
+
+		// when the guard narrows it
+		if (isTodoItem(input)) {
+			// then the narrowed status must be assignable to TodoStatus without casts
+			const status: TodoStatus = input.status;
+			const item: TodoItem = input;
+			expect(item.content).toBe("wire");
+			expect(status).toBe("in_progress");
+		} else {
+			throw new Error("expected canonical item to be narrowed");
+		}
+	});
+
+	it("array and phase guards reject legacy non-canonical statuses", () => {
+		// when / then
+		expect(isTodoItemArray([{ content: "ok", status: "pending" }])).toBe(true);
+		expect(isTodoItemArray([{ content: "bad", status: "cancelled" }])).toBe(false);
+		expect(isTodoItemArray([{ content: "bad", status: "blocked" }])).toBe(false);
+		expect(isTodoPhase({ name: "P", tasks: [{ content: "ok", status: "completed" }] })).toBe(true);
+		expect(isTodoPhase({ name: "P", tasks: [{ content: "bad", status: "cancelled" }] })).toBe(false);
+		expect(isTodoPhaseArray([{ name: "P", tasks: [{ content: "ok", status: "pending" }] }])).toBe(true);
+		expect(isTodoPhaseArray([{ name: "P", tasks: [{ content: "bad", status: "cancelled" }] }])).toBe(false);
+	});
+
+	it("still migrates legacy cancelled tasks to abandoned through the read path", () => {
+		// given a legacy flat todowrite payload with a cancelled entry
+		const entries = [
+			{
+				type: "custom",
+				customType: TODO_STATE_ENTRY_TYPE,
+				data: {
+					todos: [{ content: "Legacy cancelled", status: "cancelled", priority: "low" }],
+				},
+			},
+		];
+
+		// when the branch state is read
+		const phases = getLatestPhasesFromBranchEntries(entries);
+
+		// then cancelled is migrated to abandoned, not dropped
+		expect(phases).toEqual([
+			{ name: DEFAULT_INIT_PHASE, tasks: [{ content: "Legacy cancelled", status: "abandoned" }] },
+		]);
 	});
 
 	it("reconstructs the latest phases from v2 custom entries", () => {

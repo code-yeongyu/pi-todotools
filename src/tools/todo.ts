@@ -73,8 +73,9 @@ export function registerTodoTool(pi: ExtensionAPI, accessors: TodoAccessors): vo
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx): Promise<TodoToolResult> {
 			const previousPhases = clonePhases(accessors.getCurrentPhases());
 			const readOnly = params.op === "view";
+			const errors: string[] = [];
 			const applied = readOnly
-				? { phases: previousPhases, errors: [] as string[] }
+				? { phases: previousPhases, errors }
 				: applyParams(clonePhases(previousPhases), params);
 			const failed = applied.errors.length > 0;
 			const effective = failed ? previousPhases : applied.phases;

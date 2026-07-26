@@ -142,7 +142,12 @@ export function clonePhases(phases: readonly TodoPhase[]): TodoPhase[] {
 }
 
 export function isTodoItem(value: unknown): value is TodoItem {
-	return parseTodoItem(value) !== undefined;
+	// Strict guard: only the canonical TodoStatus values are accepted. Legacy
+	// statuses like "cancelled" are migrated to "abandoned" by the parse path
+	// (parseTodoItem/readTodoPayload), not by this guard, so a narrowed value's
+	// status is always a sound TodoStatus rather than the unchanged input.
+	if (!isRecord(value) || typeof value["content"] !== "string") return false;
+	return isTodoStatus(value["status"]);
 }
 
 export function isTodoItemArray(value: unknown): value is TodoItem[] {
@@ -150,7 +155,8 @@ export function isTodoItemArray(value: unknown): value is TodoItem[] {
 }
 
 export function isTodoPhase(value: unknown): value is TodoPhase {
-	return parseTodoPhase(value) !== undefined;
+	if (!isRecord(value) || typeof value["name"] !== "string" || !Array.isArray(value["tasks"])) return false;
+	return value["tasks"].every(isTodoItem);
 }
 
 export function isTodoPhaseArray(value: unknown): value is TodoPhase[] {
