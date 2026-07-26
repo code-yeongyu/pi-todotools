@@ -1,66 +1,17 @@
-import { type ExtensionAPI, type ExtensionContext, Theme, type ToolDefinition } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, Theme, ToolDefinition } from "@earendil-works/pi-coding-agent";
 import stripAnsi from "strip-ansi";
 import { describe, expect, it, vi } from "vitest";
 import { TODO_STATE_ENTRY_TYPE, type TodoPhase, type TodoToolDetails } from "../src/state.js";
 import { phaseRomanNumeral, registerTodoTool, TODO_PARAMS_SCHEMA } from "../src/tools/todo.js";
 
-const fgColors: ConstructorParameters<typeof Theme>[0] = {
-	accent: "#ffffff",
-	border: "#ffffff",
-	borderAccent: "#ffffff",
-	borderMuted: "#ffffff",
-	success: "#ffffff",
-	error: "#ffffff",
-	warning: "#ffffff",
-	muted: "#ffffff",
-	dim: "#ffffff",
-	text: "#ffffff",
-	thinkingText: "#ffffff",
-	userMessageText: "#ffffff",
-	customMessageText: "#ffffff",
-	customMessageLabel: "#ffffff",
-	toolTitle: "#ffffff",
-	toolOutput: "#ffffff",
-	mdHeading: "#ffffff",
-	mdLink: "#ffffff",
-	mdLinkUrl: "#ffffff",
-	mdCode: "#ffffff",
-	mdCodeBlock: "#ffffff",
-	mdCodeBlockBorder: "#ffffff",
-	mdQuote: "#ffffff",
-	mdQuoteBorder: "#ffffff",
-	mdHr: "#ffffff",
-	mdListBullet: "#ffffff",
-	toolDiffAdded: "#ffffff",
-	toolDiffRemoved: "#ffffff",
-	toolDiffContext: "#ffffff",
-	syntaxComment: "#ffffff",
-	syntaxKeyword: "#ffffff",
-	syntaxFunction: "#ffffff",
-	syntaxVariable: "#ffffff",
-	syntaxString: "#ffffff",
-	syntaxNumber: "#ffffff",
-	syntaxType: "#ffffff",
-	syntaxOperator: "#ffffff",
-	syntaxPunctuation: "#ffffff",
-	thinkingOff: "#ffffff",
-	thinkingMinimal: "#ffffff",
-	thinkingLow: "#ffffff",
-	thinkingMedium: "#ffffff",
-	thinkingHigh: "#ffffff",
-	thinkingXhigh: "#ffffff",
-	thinkingMax: "#ffffff",
-	bashMode: "#ffffff",
-};
-const bgColors: ConstructorParameters<typeof Theme>[1] = {
-	selectedBg: "#000000",
-	userMessageBg: "#000000",
-	customMessageBg: "#000000",
-	toolPendingBg: "#000000",
-	toolSuccessBg: "#000000",
-	toolErrorBg: "#000000",
-};
-const testTheme = new Theme(fgColors, bgColors, "truecolor");
+// A real Theme value import would pull the whole pi-coding-agent index (and its
+// transitive undici) into the test process, which crashes on older Node 20
+// runtimes. The render assertions only need the styling hooks.
+const testTheme = {
+	fg: (_color: string, text: string) => text,
+	bold: (text: string) => text,
+	strikethrough: (text: string) => text,
+} as unknown as Theme;
 
 const markerTheme = {
 	fg: (name: string, text: string) => `<fg:${name}>${text}</fg:${name}>`,
