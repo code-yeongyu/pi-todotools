@@ -1,7 +1,7 @@
 {
 	"name": "pi-todotools",
-	"version": "0.1.1",
-	"description": "Structured todo tool extension for the pi coding agent. Registers todowrite/todoread, persistent task state, sidebar rendering, workflow prompt guidance, and todo continuation follow-ups.",
+	"version": "0.2.0",
+	"description": "Phased, op-based todo tool extension for the pi coding agent. Registers a single todo tool (init/start/done/drop/rm/append/view), persistent phased task state, sidebar rendering, and task-management prompt guidance.",
 	"type": "module",
 	"license": "MIT",
 	"homepage": "https://github.com/code-yeongyu/pi-todotools",
@@ -19,10 +19,8 @@
 		"pi-extension",
 		"coding-agent",
 		"todo",
-		"todowrite",
-		"todoread",
+		"phased-todo",
 		"task-management",
-		"continuation",
 		"typescript"
 	],
 	"pi": {

@@ -2,49 +2,52 @@
 
 [![ci](https://github.com/code-yeongyu/pi-todotools/actions/workflows/ci.yml/badge.svg)](https://github.com/code-yeongyu/pi-todotools/actions/workflows/ci.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Structured todo tools for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent). The extension registers `todowrite` and `todoread`, persists todo state in the session, renders a sidebar widget, and appends workflow-first prompt guidance.
+Phased, op-based todo tool for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent). The extension registers a single `todo` tool, persists phased task state in the session, renders a sidebar widget, and appends task-management prompt guidance.
 
-This package is the standalone extraction of senpi-mono's former builtin `todotools` extension.
+This package is the standalone extraction of senpi-mono's former builtin `todotools` extension. The phased model is ported from [oh-my-pi](https://github.com/can1357/oh-my-pi)'s todo tool (v17.0.5, MIT — see [NOTICE](NOTICE)).
 
 ## Behavior
 
 | Case | Result |
 |------|--------|
-| Agent calls `todowrite` | replaces the complete todo list, persists it as `sanepi.todo-state`, and refreshes the todo sidebar |
-| Agent calls `todoread` | returns the current todo list as JSON |
-| Session reloads or tree navigation changes | reconstructs the latest branch-local todo state from custom entries or historical `todowrite` results |
-| All todos are `completed` or `cancelled` | hides the sidebar |
+| Agent calls `todo` with a mutating op | applies the operation atomically, persists the phased state as `sanepi.todo-state`, and refreshes the todo sidebar |
+| Agent calls `todo` with `op: "view"` | echoes the current list read-only; nothing is persisted |
+| An operation fails validation | the whole mutation is rejected; memory and session state stay unchanged |
+| A task is completed | the earliest still-open task (in phase order) auto-promotes to `in_progress` |
+| Session reloads or tree navigation changes | reconstructs the latest branch-local state from `sanepi.todo-state` entries or historical `todo`/`todowrite` tool results |
+| All tasks are `completed` or `abandoned` | hides the sidebar |
 
-## Tools
+## The `todo` tool
 
-### `todowrite`
+Tasks and phases are referenced by their verbatim content string — there are no auto-generated IDs.
 
-Creates or replaces the structured task list. Each call must pass the full list.
+| op | Required fields | Effect |
+|----|-----------------|--------|
+| `init` | `list: [{phase, items}]` or flat `items` | Initialize the full list (replaces existing) |
+| `start` | `task` | Mark a task in progress (demotes the previous one) |
+| `done` | `task` or `phase` | Mark completed |
+| `drop` | `task` or `phase` | Mark abandoned |
+| `rm` | `task` or `phase` (optional) | Remove a task or a phase's tasks; omit both to clear all |
+| `append` | `phase`, `items` | Append tasks to a phase; lazily creates the phase |
+| `view` | — | Read-only echo of the list |
 
 ```json
 {
-  "todos": [
-    {
-      "content": "src/utils/validation.ts: Add validateEmail() for input sanitization - expect boolean result",
-      "status": "in_progress",
-      "priority": "high"
-    },
-    {
-      "content": "validation.test.ts: Add invalid-email regression test - expect foo to fail",
-      "status": "pending",
-      "priority": "medium"
-    }
+  "op": "init",
+  "list": [
+    { "phase": "Foundation", "items": ["Scaffold workspace", "Wire entrypoint"] },
+    { "phase": "Verification", "items": ["Run focused tests"] }
   ]
 }
 ```
 
-### `todoread`
+## Migrating from 0.1.x (breaking change)
 
-Reads the current todo list for the active coding session.
+Version 0.2.0 removes the `todowrite` and `todoread` tools and replaces them with the single op-based `todo` tool.
 
-```json
-{}
-```
+- **Session state migrates automatically.** Legacy flat `sanepi.todo-state` payloads (the `todos` array with `priority` fields and `cancelled` statuses) and historical `todowrite` tool results are still read: they load as one `Tasks` phase, with `cancelled` mapped to `abandoned` and unknown statuses preserved as `pending` open work.
+- **External configuration does NOT migrate.** Tool allowlists, permission rules, or other configuration that references the `todowrite`/`todoread` tool names must be updated manually to reference `todo` — state migration only covers session data and does not touch external configuration.
+- **Item shape changed.** Tasks are now `{content, status}` without `priority`; statuses are `pending | in_progress | completed | abandoned`.
 
 ## Installation
 
@@ -87,7 +90,7 @@ pi -e ./src/index.ts
 
 ## Origin
 
-Extracted from `packages/coding-agent/src/core/extensions/builtin/todotools` in `code-yeongyu/senpi-mono`.
+Extracted from `packages/coding-agent/src/core/extensions/builtin/todotools` in `code-yeongyu/senpi-mono`. The phased todo model is ported from [oh-my-pi](https://github.com/can1357/oh-my-pi) (`packages/coding-agent/src/tools/todo.ts`, commit `9fd6e97113f5ed3a847e66d346970efdf8afcad9`, v17.0.5, MIT).
 
 ## License
 
@@ -102,4 +105,5 @@ Extracted from `packages/coding-agent/src/core/extensions/builtin/todotools` in 
 ## Acknowledgements
 
 - **Mario Zechner** ([@badlogic](https://github.com/badlogic)) — author of [pi-mono](https://github.com/badlogic/pi-mono) and the pi-coding-agent extension API this package targets.
+- **Can Bölük** ([@can1357](https://github.com/can1357)) — author of [oh-my-pi](https://github.com/can1357/oh-my-pi), whose phased todo tool this package ports.
 - **Yeongyu Kim** ([@code-yeongyu](https://github.com/code-yeongyu)) — maintainer of the senpi fork and this extracted extension.
