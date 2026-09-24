@@ -54,17 +54,15 @@ Version 0.2.0 removes the `todowrite` and `todoread` tools and replaces them wit
 The package targets the [`pi`](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) coding agent. Pi loads extensions from `~/.pi/agent/extensions/`, project `.pi/extensions/`, or via the `--extension` / `-e` CLI flag.
 
 ```bash
-# 1. From npm (once published)
-pi install npm:pi-todotools
-
-# 2. From git
+# 1. From git
 pi install git:github.com/code-yeongyu/pi-todotools
+senpi install git:github.com/code-yeongyu/pi-todotools
 
-# 3. Manual placement (npm consumer install)
+# 2. Manual placement
 git clone https://github.com/code-yeongyu/pi-todotools ~/.pi/agent/extensions/pi-todotools
 cd ~/.pi/agent/extensions/pi-todotools && npm install
 
-# 4. Dev / one-shot test
+# 3. Dev / one-shot test
 pi -e /path/to/pi-todotools/src/index.ts
 ```
 

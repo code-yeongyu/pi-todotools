@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Docs: install from GitHub instead of npm.
+
 ## [0.2.1] - 2026-09-24
 
 ### Changed
