@@ -60,7 +60,7 @@ pi install npm:pi-todotools
 # 2. From git
 pi install git:github.com/code-yeongyu/pi-todotools
 
-# 3. Manual placement
+# 3. Manual placement (npm consumer install)
 git clone https://github.com/code-yeongyu/pi-todotools ~/.pi/agent/extensions/pi-todotools
 cd ~/.pi/agent/extensions/pi-todotools && npm install
 
@@ -72,19 +72,28 @@ After installation, restart pi or run `/reload` inside an interactive session.
 
 ## Development
 
+Dev toolchain is Bun 1.4.2 (Node >= 22.19.0). Extension hosts still install with npm, so `package-lock.json` is kept in sync with `bun.lock`.
+
 ```bash
-npm install
-npm test
-npm run typecheck
-npm run check
+bun install
+bun run test
+bun run typecheck
+bun run check
 npm pack --dry-run
 pi -e ./src/index.ts
+```
+
+npm consumer smoke (what extension hosts run):
+
+```bash
+npm ci
+npm test
 ```
 
 ## Branch rules and releases
 
 - `main` is protected by `.github/branch-ruleset.json`.
-- CI runs Node 20 and 22 on Ubuntu and macOS.
+- CI runs Bun 1.4.2 on Ubuntu and macOS with Node 22 and 24, plus an `npm-consumer` job (`npm ci` + `npm test`).
 - Releases are GitHub Releases tagged as `v<semver>`.
 - Publishing runs from the `publish` workflow after a GitHub Release is published.
 

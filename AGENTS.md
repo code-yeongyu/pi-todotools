@@ -12,17 +12,18 @@ Conventions for human contributors and AI agents working on this repository.
 
 ## Commands
 
-- `npm install` — install dependencies.
-- `npm test` — run vitest once.
-- `npm run typecheck` — strict TypeScript check.
-- `npm run check` — type check + biome.
+- `bun install` — install dependencies (primary dev toolchain, Bun 1.4.2).
+- `bun run test` — run vitest once.
+- `bun run typecheck` — strict TypeScript check.
+- `bun run check` — type check + biome.
+- `npm ci && npm test` — npm consumer smoke (extension hosts install with npm).
 - `npm pack --dry-run` — release package smoke test.
 - `pi -e ./src/index.ts` — load the extension into a local pi session for manual smoke testing.
 
 ## Constraints
 
-- No Bun APIs. Runtime is Node only.
-- No dependency on pi-coding-agent internal modules outside the documented public extension API in `@mariozechner/pi-coding-agent`.
+- No Bun APIs. Runtime is Node only. Bun is the install/test toolchain, not a runtime dependency.
+- No dependency on pi-coding-agent internal modules outside the documented public extension API in `@earendil-works/pi-coding-agent`.
 - Keep the `todo` tool name and the `sanepi.todo-state` custom entry key stable; existing session history reconstructs todo state from `todo` and legacy `todowrite` tool results.
 - Keep legacy flat `sanepi.todo-state` payloads (the `todos` array with `priority` fields and `cancelled` statuses) readable for compatibility with sessions created before 0.2.0.
 

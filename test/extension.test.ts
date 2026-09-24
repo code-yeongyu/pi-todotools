@@ -16,6 +16,12 @@ function createMockPi() {
 			const eventHandlers = handlers.get(event) ?? [];
 			eventHandlers.push(handler);
 			handlers.set(event, eventHandlers);
+			return () => {
+				handlers.set(
+					event,
+					(handlers.get(event) ?? []).filter((candidate) => candidate !== handler),
+				);
+			};
 		},
 		events: { emit: vi.fn(), on: vi.fn(() => () => {}) },
 	} as Partial<ExtensionAPI> as ExtensionAPI;
