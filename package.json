@@ -1,6 +1,6 @@
 {
 	"name": "pi-todotools",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Phased, op-based todo tool extension for the pi coding agent. Registers a single todo tool (init/start/done/drop/rm/append/view), persistent phased task state, sidebar rendering, and task-management prompt guidance.",
 	"type": "module",
 	"license": "MIT",
@@ -50,16 +50,20 @@
 		"typebox": "*"
 	},
 	"dependencies": {
-		"strip-ansi": "^7.1.2"
+		"strip-ansi": "^7.2.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.5",
-		"@types/node": "^26.1.1",
-		"@typescript/native-preview": "^7.0.0-dev.20260707.2",
-		"typescript": "^7.0.2",
-		"vitest": "^4.1.10"
+		"@biomejs/biome": "2.5.14",
+		"@earendil-works/pi-ai": "0.87.1",
+		"@earendil-works/pi-coding-agent": "0.87.1",
+		"@earendil-works/pi-tui": "0.87.1",
+		"@types/node": "26.6.2",
+		"@typescript/native-preview": "7.0.0-dev.20260707.2",
+		"typebox": "1.3.34",
+		"typescript": "7.0.2",
+		"vitest": "5.0.1"
 	},
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=22.19.0"
 	}
 }

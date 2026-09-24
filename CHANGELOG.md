@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1] - 2026-09-24
+
+### Changed
+
+- Raised `@earendil-works/pi-coding-agent` and `@earendil-works/pi-tui` peer floors to `>=0.87.0` so tool `Text` components satisfy Pi 0.87's `invalidate()` contract (thanks [@FRFlo](https://github.com/FRFlo), #17). Date-versioned downstream runtimes such as `2026.9.24` still satisfy this range; do not use `^0.87`.
+- Development and CI toolchain now uses Bun 1.4.2. `engines.node` is `>=22.19.0`. CI matrix is Ubuntu/macOS × Node 22/24 with `actions/checkout@v7` and `actions/setup-node@v7`, plus an `npm-consumer` job (`npm ci` + `npm test`). `bun.lock` is added; `package-lock.json` is kept for npm consumers.
+- Refreshed dependencies: `@biomejs/biome` 2.5.14, `vitest` 5.0.1, `typescript` 7.0.2, `@types/node` 26.6.2, `@typescript/native-preview` 7.0.0-dev.20260707.2, `strip-ansi` ^7.2.0. Added exact `@earendil-works/pi-ai` / `pi-coding-agent` / `pi-tui` 0.87.1 and `typebox` 1.3.34 devDependencies so tests run against the current upstream runtime.
+
+### Fixed
+
+- Dependency and CI refresh tracked in #18.
+
 ## [0.2.0] - 2026-07-26
 
 ### Changed
