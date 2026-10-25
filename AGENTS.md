@@ -12,7 +12,7 @@ Conventions for human contributors and AI agents working on this repository.
 
 ## Commands
 
-- `bun install` — install dependencies (primary dev toolchain, Bun 1.4.2).
+- `bun install` — install dependencies (primary dev toolchain, Bun 1.4.4).
 - `bun run test` — run vitest once.
 - `bun run typecheck` — strict TypeScript check.
 - `bun run check` — type check + biome.

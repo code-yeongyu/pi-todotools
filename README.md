@@ -70,7 +70,7 @@ After installation, restart pi or run `/reload` inside an interactive session.
 
 ## Development
 
-Dev toolchain is Bun 1.4.2 (Node >= 22.19.0). Extension hosts still install with npm, so `package-lock.json` is kept in sync with `bun.lock`.
+Dev toolchain is Bun 1.4.4 (Node >= 22.19.0). Extension hosts still install with npm, so `package-lock.json` is kept in sync with `bun.lock`.
 
 ```bash
 bun install
@@ -91,7 +91,7 @@ npm test
 ## Branch rules and releases
 
 - `main` is protected by `.github/branch-ruleset.json`.
-- CI runs Bun 1.4.2 on Ubuntu and macOS with Node 22 and 24, plus an `npm-consumer` job (`npm ci` + `npm test`).
+- CI runs Bun 1.4.4 on Ubuntu and macOS with Node 22 and 24, plus an `npm-consumer` job (`npm ci` + `npm test`).
 - Releases are GitHub Releases tagged as `v<semver>`.
 - Publishing runs from the `publish` workflow after a GitHub Release is published.
 

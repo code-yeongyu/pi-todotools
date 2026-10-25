@@ -5,6 +5,7 @@
 ### Changed
 
 - Docs: install from GitHub instead of npm.
+- CI and the development docs use Bun 1.4.4 (was 1.4.2).
 
 ## [0.2.1] - 2026-09-24
 
